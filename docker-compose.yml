@@ -1,0 +1,103 @@
+version: "3.7"
+
+services:
+    hsa_queues_producer:
+        container_name: hsa_queues_producer
+        build: producer
+        expose:
+            - 3000
+        ports:
+            - 0.0.0.0:9999:3000
+            - 0.0.0.0:9988:9249
+        command: npm run start:debug
+        volumes:
+            - ./producer:/usr/src/app
+        networks:
+            hsa_queues_net:
+                ipv4_address: 172.16.122.9
+    
+    hsa_queues_consumer:
+        container_name: hsa_queues_consumer
+        build: consumer
+        expose:
+            - 3000
+        ports:
+            - 0.0.0.0:9998:3000
+            - 0.0.0.0:9987:9249
+        command: npm run start:debug
+        volumes:
+            - ./consumer:/usr/src/app
+        networks:
+            hsa_queues_net:
+                ipv4_address: 172.16.122.10
+    
+    hsa_queues_beanstalkd:
+        image:          schickling/beanstalkd
+        container_name: hsa_queues_beanstalkd
+        ports:
+            - '11300:11300'
+        networks:
+            hsa_queues_net:
+                ipv4_address: 172.16.122.11
+                
+    hsa_queues_redis_rdb:
+        image:          redis:latest
+        container_name: hsa_queues_redis_rdb
+        command: [
+            'redis-server',
+            '--appendonly',
+            'no',
+            '--maxmemory',
+            '1000mb',
+            '--tcp-keepalive',
+            '60',
+            '--maxclients',
+            '10000',
+            '--client-output-buffer-limit',
+            'pubsub 256mb 800mb 60',
+            '--save',
+            '3 1',
+        ] # rdb - save a snapshot every 3 seconds if there was at least 1 change
+        ports:
+            - '7379:6379'
+        networks:
+            hsa_queues_net:
+                ipv4_address: 172.16.122.12
+        volumes:
+            - hsa_queues_redis_rdb_data:/data
+            
+    hsa_queues_redis_aof:
+        image:          redis:latest
+        container_name: hsa_queues_redis_aof
+        command: [
+            'redis-server',
+            '--appendonly',
+            'yes',
+            '--maxmemory',
+            '1000mb',
+            '--tcp-keepalive',
+            '60',
+            '--maxclients',
+            '10000',
+            '--client-output-buffer-limit',
+            'pubsub 256mb 800mb 60',
+        ]
+        ports:
+            - '8379:6379'
+        networks:
+            hsa_queues_net:
+                ipv4_address: 172.16.122.13
+        volumes:
+            - hsa_queues_redis_aof_data:/data
+
+networks:
+    hsa_queues_net:
+        name: hsa_queues_net
+        ipam:
+            driver: default
+            config:
+            - subnet: 172.16.122.0/24
+
+volumes:
+    hsa_queues_redis_rdb_data:
+    hsa_queues_redis_aof_data:
