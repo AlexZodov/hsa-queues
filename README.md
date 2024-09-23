@@ -16,8 +16,8 @@ Compare queues performance.
 1. Clone the repo to local machine
 2. Head to `./producer` on local machine and run `npm install` (required once to create node_modules folder before it will be projected to inner docker container filesystem)
 3. Head to `./consumer` on local machine and run `npm install` (required once to create node_modules folder before it will be projected to inner docker container filesystem)
-4. Head to `./consumer`, create .env file from .env dist and define there value for variable `MODE` (available values: `beanstlkd`, `redis_rbd`, `redis_aof`)
-5. Head to `./producer`, create .env file from .env dist and define there value for variable `MODE` (available values: `beanstlkd`, `redis_rbd`, `redis_aof`)
+4. Head to `./consumer`, create .env file from .env dist and define there value for variable `MODE` (available values: `beanstalkd`, `redis_rbd`, `redis_aof`)
+5. Head to `./producer`, create .env file from .env dist and define there value for variable `MODE` (available values: `beanstalkd`, `redis_rbd`, `redis_aof`)
 6. Values for env variable at steps 4 & 5 should be the same !!!
 7. Head to root of the cloned repo
 8. Run `docker-compose up -d`
